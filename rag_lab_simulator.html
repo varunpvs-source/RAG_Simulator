@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAG Lab — Retrieval-Augmented Generation Simulator</title>
+<style>
+:root{--navy:#10243a;--navy2:#173b5e;--blue:#0078d4;--blue2:#2b88d8;--cyan:#50e6ff;--ink:#172b4d;--muted:#60758b;--line:#dbe5ef;--bg:#f3f7fb;--card:#fff;--green:#107c41;--amber:#986f0b;--red:#c4314b;--shadow:0 8px 28px rgba(16,36,58,.08)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:"Segoe UI",Arial,sans-serif;color:var(--ink);line-height:1.5}button,input,textarea,select{font:inherit}button{cursor:pointer}.topbar{background:linear-gradient(115deg,var(--navy),#174a76);color:#fff;padding:20px clamp(18px,4vw,56px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:12px}.brandmark{width:36px;height:36px;display:grid;grid-template-columns:1fr 1fr;gap:3px;transform:rotate(-4deg)}.brandmark i{display:block;background:#50e6ff;border-radius:2px}.brandmark i:nth-child(2){opacity:.72}.brandmark i:nth-child(3){opacity:.52}.brandmark i:nth-child(4){background:#fff;opacity:.9}.brand strong{font-size:18px;letter-spacing:.2px}.brand small{display:block;color:#c3d9ed;font-size:12px}.topnote{font-size:12px;color:#d5e7f5;border:1px solid #426987;border-radius:20px;padding:7px 12px}.hero{padding:30px clamp(18px,4vw,56px) 24px;background:#fff;border-bottom:1px solid var(--line)}.eyebrow{color:var(--blue);font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase}.hero h1{font-size:clamp(26px,3vw,38px);line-height:1.15;margin:7px 0 10px;color:#102a43}.hero p{max-width:850px;margin:0;color:#526a80}.hero strong{color:#193f63}.progress-wrap{padding:20px clamp(18px,4vw,56px);background:#fff}.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.step{position:relative;display:flex;align-items:center;gap:10px;padding:10px 8px;color:#718398;border-bottom:3px solid #e1e8ef;font-size:13px;font-weight:600}.step .num{display:grid;place-items:center;flex:0 0 28px;height:28px;border-radius:50%;background:#edf2f7;color:#60758b}.step.active{color:#075a9e;border-color:var(--blue)}.step.active .num{background:var(--blue);color:#fff}.step.done{color:var(--green);border-color:#62b88b}.step.done .num{background:#dff5e8;color:var(--green)}main{max-width:1440px;margin:0 auto;padding:24px clamp(16px,3vw,42px) 48px}.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,.8fr);gap:20px;align-items:start}.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}.panel-head{padding:16px 20px;border-bottom:1px solid #e8eef4;display:flex;align-items:center;justify-content:space-between;gap:12px}.panel-head h2,.panel-head h3{font-size:16px;margin:0;color:#183b5b}.panel-head p{margin:3px 0 0;font-size:12px;color:var(--muted)}.panel-body{padding:20px}.pill{font-size:11px;font-weight:700;letter-spacing:.3px;border-radius:20px;padding:5px 9px;background:#e7f3ff;color:#075a9e;white-space:nowrap}.pill.green{background:#e2f6e9;color:#107c41}.pill.amber{background:#fff4ce;color:#7a5700}.field-label{font-weight:700;font-size:13px;display:block;margin:0 0 7px}.hint{font-size:12px;color:var(--muted);margin:6px 0 0}.input,textarea,select{width:100%;border:1px solid #b8c8d8;border-radius:7px;padding:10px 12px;background:#fff;color:var(--ink);outline:none}.input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #0078d420}textarea{resize:vertical;min-height:150px}.row{display:flex;gap:12px;align-items:end}.row>*{flex:1;min-width:0}.btn{border:0;border-radius:6px;padding:10px 15px;font-weight:650;font-size:13px;transition:.15s}.btn.primary{background:var(--blue);color:#fff}.btn.primary:hover{background:#006cbe}.btn.secondary{background:#e8f2fb;color:#075a9e}.btn.ghost{background:#fff;border:1px solid #bdcbd9;color:#23445f}.btn:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}.statusline{display:flex;gap:9px;align-items:flex-start;background:#f0f7fd;border-left:3px solid var(--blue);padding:11px 12px;border-radius:4px;font-size:12px;color:#34536e;margin-top:14px}.statusline b{color:#174a76}.chunk-list{display:grid;gap:10px}.chunk{border:1px solid #d6e3ef;border-radius:8px;padding:12px;background:#fbfdff}.chunk-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:7px}.chunk-id{font-size:12px;font-weight:800;color:#17649d}.chunk-meta{font-size:11px;color:#718398}.chunk p{font-size:13px;margin:0;color:#354f66}.vector{font-family:Consolas,monospace;font-size:11px;color:#126b89;background:#eaf8fb;border-radius:4px;padding:6px 8px;margin-top:8px;overflow-wrap:anywhere}.match{border:1px solid #c7e5d3;background:#f7fdf9;border-radius:8px;padding:12px;margin-bottom:9px}.match-top{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:700}.score{color:var(--green)}.bar{height:6px;border-radius:9px;background:#e5eee8;margin:7px 0 9px;overflow:hidden}.bar span{display:block;height:100%;background:#21a366;border-radius:9px}.match p{font-size:12px;margin:0;color:#38566b}.empty{padding:22px;border:1px dashed #cbd8e4;border-radius:8px;text-align:center;color:#73879a;font-size:13px}.side-sticky{position:sticky;top:14px}.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.metric{background:#f5f9fc;border:1px solid #e0eaf2;border-radius:8px;padding:12px}.metric .value{font-size:23px;font-weight:750;color:#145d92}.metric .label{font-size:11px;color:#60758b}.flowline{display:flex;flex-direction:column;gap:0}.flowitem{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #edf1f5}.flowitem:last-child{border:0}.flowdot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e5f2ff;color:#0969ad;font-size:12px;font-weight:800;flex-shrink:0}.flowitem strong{display:block;font-size:12px}.flowitem small{display:block;color:#718398;font-size:11px}.codebox{font-family:Consolas,monospace;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;background:#102b43;color:#d7edf9;border-radius:8px;padding:14px;max-height:280px;overflow:auto}.answerbox{background:#f3f9ff;border:1px solid #cfe4f6;border-radius:9px;padding:15px}.answerbox h4{margin:0 0 8px;font-size:14px;color:#145d92}.answerbox p{margin:0;font-size:14px}.citation{display:inline-block;border-radius:4px;padding:2px 5px;background:#d8edff;color:#075a9e;font-size:11px;font-weight:700;margin:0 2px}.notice{font-size:12px;color:#765e18;background:#fff8dc;border:1px solid #f1df9c;padding:11px;border-radius:7px;margin-top:12px}.footer{text-align:center;font-size:11px;color:#7a8da0;padding:20px}.section-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#6a8094;font-weight:800;margin:18px 0 8px}.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hidden{display:none!important}.learn{border-top:1px solid var(--line);margin-top:14px;padding-top:13px;font-size:12px;color:#526a80}.learn summary{cursor:pointer;font-weight:700;color:#174a76}.learn p{margin:8px 0 0}.tiny{font-size:11px;color:#6c8094}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.side-sticky{position:static}.steps{grid-template-columns:1fr 1fr}.step:last-child{grid-column:span 2}}@media(max-width:560px){.steps{grid-template-columns:1fr}.step:last-child{grid-column:auto}.row,.two-col{grid-template-columns:1fr;display:grid}.panel-body{padding:15px}.panel-head{padding:14px 15px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><div class="brandmark" aria-hidden="true"><i></i><i></i><i></i><i></i></div><div><strong>RAG Lab</strong><small>Retrieval-Augmented Generation · Interactive simulator</small></div></div>
+  <div class="topnote">LEARN BY EXPERIMENTING · NO API KEY REQUIRED</div>
+</header>
+<section class="hero">
+  <div class="eyebrow">AI concepts, made tangible</div>
+  <h1>See how RAG finds context before it answers.</h1>
+  <p>Bring a small set of documents, split them into chunks, create <strong>simulated embeddings</strong>, retrieve the most relevant chunks for a question, and assemble an augmented prompt. Change the question or settings to see what changes.</p>
+</section>
+<div class="progress-wrap"><div class="steps" id="steps">
+  <div class="step active" data-step="1"><span class="num">1</span><span>Source documents</span></div>
+  <div class="step" data-step="2"><span class="num">2</span><span>Chunking</span></div>
+  <div class="step" data-step="3"><span class="num">3</span><span>Embeddings</span></div>
+  <div class="step" data-step="4"><span class="num">4</span><span>Retrieval</span></div>
+  <div class="step" data-step="5"><span class="num">5</span><span>Augmented answer</span></div>
+</div></div>
+<main>
+<div class="layout">
+<div>
+  <section class="panel" id="sourcePanel">
+    <div class="panel-head"><div><h2>1. Add your knowledge source</h2><p>RAG searches the documents you provide—not the whole internet.</p></div><span class="pill">INPUT</span></div>
+    <div class="panel-body">
+      <label class="field-label" for="docs">Documents / knowledge base</label>
+      <textarea id="docs" spellcheck="false">Product: Contoso Travel App
+The Contoso Travel app helps employees book business trips. Employees can search flights and hotels, compare options, and submit a trip request. The app does not automatically approve bookings.
+
+Expense policy
+Employees may claim meals up to $45 per day during approved business travel. Hotel expenses must be booked through the company travel portal. Receipts are required for individual expenses above $25. Expense claims should be submitted within 10 business days after returning.
+
+IT support
+For login problems, reset your password using the company identity portal. If you still cannot sign in, contact the IT Help Desk at helpdesk@contoso.example. The Help Desk operates Monday to Friday, 9 AM to 5 PM.
+
+Approvals
+A manager reviews trip requests within two business days. International travel also requires approval from the department director. A submitted request is not a confirmed booking until the required approvals are complete.</textarea>
+      <p class="hint">Use blank lines to separate documents. For this demo, the text stays in your browser and is not uploaded.</p>
+      <div class="actions"><button class="btn primary" id="processBtn">Process documents →</button><button class="btn ghost" id="sampleBtn">Restore sample data</button></div>
+      <div class="statusline"><span>ⓘ</span><div><b>Key idea:</b> RAG does not magically know your private documents. Your app first needs to ingest and index the information it is allowed to use.</div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="chunkPanel">
+    <div class="panel-head"><div><h2>2. Split text into chunks</h2><p>Chunks are the smaller passages that retrieval can return.</p></div><span class="pill" id="chunkPill">NOT RUN</span></div>
+    <div class="panel-body">
+      <div class="row">
+        <div><label class="field-label" for="chunkSize">Chunk size (approx. words)</label><select id="chunkSize"><option value="35">Small · 35 words</option><option value="60" selected>Medium · 60 words</option><option value="100">Large · 100 words</option></select></div>
+        <div><label class="field-label" for="overlap">Overlap (words)</label><select id="overlap"><option value="0">None</option><option value="8" selected>8 words</option><option value="15">15 words</option></select></div>
+      </div>
+      <p class="hint">This simplified demo splits by words and adds overlap. Real systems may split by paragraphs, headings, tokens, or semantic boundaries.</p>
+      <div class="section-label">Chunk preview</div><div id="chunks" class="chunk-list"><div class="empty">Process your documents to see the chunks here.</div></div>
+      <details class="learn"><summary>Why do chunk size and overlap matter?</summary><p>Very small chunks can lose context; very large chunks may include distracting information. Overlap helps preserve details that fall near chunk boundaries, but too much overlap creates duplicate content and increases index size.</p></details>
+    </div>
+  </section>
+
+  <section class="panel" id="embedPanel">
+    <div class="panel-head"><div><h2>3. Turn chunks into embeddings</h2><p>An embedding represents meaning as a numerical vector.</p></div><span class="pill" id="embedPill">NOT RUN</span></div>
+    <div class="panel-body">
+      <p style="margin-top:0;font-size:13px;color:#526a80">In a real RAG system, an embedding model maps each chunk to a high-dimensional vector. This offline simulator uses a tiny transparent word-feature vector so you can inspect the idea—it is <b>not</b> a real semantic embedding model.</p>
+      <div class="section-label">Example vector representations</div><div id="vectors" class="chunk-list"><div class="empty">Your chunks' demo vectors will appear after processing.</div></div>
+      <details class="learn"><summary>Where are embeddings stored?</summary><p>Often in a vector database or search index, alongside the original text and metadata (such as source, page, access permissions, or document title). At query time, the question is embedded using the same model and compared with stored vectors.</p></details>
+    </div>
+  </section>
+
+  <section class="panel" id="retrievePanel">
+    <div class="panel-head"><div><h2>4. Retrieve relevant chunks</h2><p>Ask a question and inspect which indexed passages score highest.</p></div><span class="pill" id="retrievalPill">WAITING</span></div>
+    <div class="panel-body">
+      <label class="field-label" for="question">User question</label><input id="question" class="input" value="How much can I claim for meals each day?" placeholder="Ask a question about your documents">
+      <div class="row" style="margin-top:12px">
+        <div><label class="field-label" for="topK">Top-K chunks</label><select id="topK"><option value="1">1 chunk</option><option value="2">2 chunks</option><option value="3" selected>3 chunks</option><option value="5">5 chunks</option></select></div>
+        <div><label class="field-label" for="threshold">Minimum match score</label><select id="threshold"><option value="0">No cutoff</option><option value="0.08" selected>Low (0.08)</option><option value="0.18">Medium (0.18)</option><option value="0.3">High (0.30)</option></select></div>
+      </div>
+      <div class="actions"><button class="btn primary" id="retrieveBtn">Search chunks →</button><button class="btn secondary" id="tryBtn">Try another question</button></div>
+      <div class="section-label">Ranked retrieval results</div><div id="results"><div class="empty">Run retrieval to see the most relevant chunks.</div></div>
+      <div class="notice"><b>Important:</b> a high similarity score is not proof that a passage is correct or sufficient. Retrieval quality depends on the embedding model, chunking, query, index, and scoring method.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="answerPanel">
+    <div class="panel-head"><div><h2>5. Build the augmented prompt</h2><p>Retrieved context is added to the question before generation.</p></div><span class="pill" id="answerPill">WAITING</span></div>
+    <div class="panel-body">
+      <div class="section-label">Prompt sent to the language model (illustration)</div>
+      <div class="codebox" id="promptBox">Run retrieval first. The augmented prompt will appear here.</div>
+      <div class="section-label">Simulated response</div>
+      <div class="answerbox" id="answerBox"><h4>Answer preview</h4><p>After retrieval, this panel will show a simple extractive demonstration based on the retrieved text.</p></div>
+      <div class="notice">This page does not call a real language model. The response is a lightweight, rule-based illustration so the full RAG pipeline works without a server or API key.</div>
+      <details class="learn"><summary>What can still go wrong?</summary><p><b>Retrieval failure:</b> the needed fact is not among the selected chunks. <b>Context failure:</b> the retrieved text is incomplete or contradictory. <b>Generation failure:</b> a real model may misread the context or add unsupported details. Production RAG should test retrieval and answer quality, cite sources, enforce permissions, and say when evidence is missing.</p></details>
+    </div>
+  </section>
+</div>
+
+<aside class="side-sticky">
+  <section class="panel">
+    <div class="panel-head"><div><h3>Pipeline overview</h3><p>Follow the information as it moves.</p></div></div>
+    <div class="panel-body"><div class="flowline">
+      <div class="flowitem"><div class="flowdot">1</div><div><strong>Source documents</strong><small>Text your app is allowed to search</small></div></div>
+      <div class="flowitem"><div class="flowdot">2</div><div><strong>Chunking</strong><small>Break text into retrievable passages</small></div></div>
+      <div class="flowitem"><div class="flowdot">3</div><div><strong>Embedding + index</strong><small>Represent and store chunk meaning</small></div></div>
+      <div class="flowitem"><div class="flowdot">4</div><div><strong>Similarity search</strong><small>Find context related to the question</small></div></div>
+      <div class="flowitem"><div class="flowdot">5</div><div><strong>Generation</strong><small>Answer using question + retrieved context</small></div></div>
+    </div></div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><div><h3>Live index stats</h3><p>Updates as you experiment.</p></div></div>
+    <div class="panel-body"><div class="metric-grid">
+      <div class="metric"><div class="value" id="statDocs">0</div><div class="label">Source sections</div></div>
+      <div class="metric"><div class="value" id="statChunks">0</div><div class="label">Chunks indexed</div></div>
+      <div class="metric"><div class="value" id="statRetrieved">0</div><div class="label">Chunks retrieved</div></div>
+      <div class="metric"><div class="value" id="statTerms">0</div><div class="label">Query terms matched</div></div>
+    </div>
+    <div class="learn"><b>Remember:</b> RAG can improve grounding by supplying relevant external context. It does not guarantee accuracy; better retrieval helps only when the right evidence is present and used correctly.</div></div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><div><h3>Try these experiments</h3></div></div>
+    <div class="panel-body">
+      <div class="chunk-list">
+        <button class="btn ghost" data-q="Who do I contact if I cannot sign in?">Find IT support contact</button>
+        <button class="btn ghost" data-q="How long does my manager have to review a trip request?">Find approval timeline</button>
+        <button class="btn ghost" data-q="Are international trips approved automatically?">Test a nuanced question</button>
+        <button class="btn ghost" data-q="What is the Wi-Fi password at the London office?">Ask something not in the docs</button>
+      </div>
+      <p class="tiny" style="margin-bottom:0">Notice when the system retrieves useful context—and when it cannot find evidence.</p>
+    </div>
+  </section>
+</aside>
+</div>
+</main>
+<div class="footer">RAG Lab · A browser-only educational demo inspired by clean Microsoft Fluent-style interfaces. No data leaves this page.</div>
+<script>
+const $=id=>document.getElementById(id);
+const sampleDocs=$('docs').value;
+let chunks=[], sourceCount=0, retrieved=[], queryTerms=[];
+const stop=new Set(['the','a','an','and','or','to','of','in','on','for','is','are','am','be','by','with','what','how','who','when','where','do','does','can','i','my','me','it','this','that','from','if','still','up','as','after','within','have','has','will','would','should','could','your','you','not','are','was','were','per','perday']);
+function words(s){return (s.toLowerCase().match(/[a-z0-9@.$'-]+/g)||[]).filter(w=>w.length>1&&!stop.has(w))}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function splitChunks(text,size,overlap){
+  const paragraphs=text.split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);
+  const out=[]; let id=1;
+  paragraphs.forEach((p,di)=>{
+    const ws=p.split(/\s+/); if(!ws.length)return;
+    let start=0;
+    while(start<ws.length){
+      const end=Math.min(start+size,ws.length), content=ws.slice(start,end).join(' ');
+      out.push({id:id++,doc:di+1,text:content,terms:words(content),start,end});
+      if(end===ws.length)break;
+      start=Math.max(start+1,end-overlap);
+    }
+  });
+  return out;
+}
+function hashVector(terms){
+  // Deliberately tiny, deterministic word-feature vector; not a semantic embedding.
+  const dims=8,v=Array(dims).fill(0);
+  terms.forEach(t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i)|0);v[Math.abs(h)%dims]+=1});
+  const norm=Math.sqrt(v.reduce((a,b)=>a+b*b,0))||1;
+  return v.map(n=>(n/norm).toFixed(2));
+}
+function cosine(a,b){let dot=0,na=0,nb=0;for(let i=0;i<a.length;i++){dot+=a[i]*b[i];na+=a[i]*a[i];nb+=b[i]*b[i]}return dot/((Math.sqrt(na)*Math.sqrt(nb))||1)}
+function similarity(qTerms,chunk){
+  const qset=new Set(qTerms), cset=new Set(chunk.terms);
+  if(!qset.size||!cset.size)return 0;
+  let overlap=0; qset.forEach(t=>{if(cset.has(t))overlap++});
+  const recall=overlap/qset.size, precision=overlap/cset.size;
+  // Blend exact term overlap with vector cosine; keeps this demo explainable.
+  const qv=hashVector(qTerms).map(Number), cv=hashVector(chunk.terms).map(Number);
+  const cos=cosine(qv,cv);
+  return Math.min(1,recall*.72+cos*.28);
+}
+function process(){
+  const text=$('docs').value.trim();
+  if(!text){alert('Add some source text first.');return}
+  sourceCount=text.split(/\n\s*\n/).filter(x=>x.trim()).length;
+  chunks=splitChunks(text,Number($('chunkSize').value),Number($('overlap').value));
+  chunks.forEach(c=>{c.vector=hashVector(c.terms)});
+  $('chunkPill').textContent=chunks.length+' CHUNKS';$('chunkPill').className='pill green';
+  $('embedPill').textContent='SIMULATED';$('embedPill').className='pill amber';
+  $('statDocs').textContent=sourceCount;$('statChunks').textContent=chunks.length;
+  $('chunks').innerHTML=chunks.map(c=>`<article class="chunk"><div class="chunk-top"><span class="chunk-id">Chunk ${c.id} · Section ${c.doc}</span><span class="chunk-meta">${c.terms.length} searchable terms</span></div><p>${esc(c.text)}</p></article>`).join('');
+  $('vectors').innerHTML=chunks.slice(0,8).map(c=>`<article class="chunk"><div class="chunk-top"><span class="chunk-id">Chunk ${c.id}</span><span class="chunk-meta">8 dimensions · demo only</span></div><div class="vector">[${c.vector.join(', ')}]</div><p class="hint">Original text remains attached to this vector for retrieval results.</p></article>`).join('')+(chunks.length>8?`<p class="tiny">Showing first 8 of ${chunks.length} chunk vectors.</p>`:'');
+  $('results').innerHTML='<div class="empty">Index ready. Ask a question and select “Search chunks”.</div>';
+  $('promptBox').textContent='Run retrieval first. The augmented prompt will appear here.';
+  $('answerBox').innerHTML='<h4>Answer preview</h4><p>Run retrieval to generate a demonstration response.</p>';
+  $('statRetrieved').textContent='0';$('statTerms').textContent='0';
+  $('retrievalPill').textContent='READY';$('retrievalPill').className='pill green';
+  $('answerPill').textContent='WAITING';$('answerPill').className='pill';
+  updateSteps(3);
+}
+function updateSteps(n){document.querySelectorAll('.step').forEach(el=>{let k=Number(el.dataset.step);el.classList.toggle('active',k===n);el.classList.toggle('done',k<n)})}
+function retrieve(){
+  if(!chunks.length){process();if(!chunks.length)return}
+  const q=$('question').value.trim();if(!q){alert('Enter a question first.');return}
+  queryTerms=words(q);
+  const scored=chunks.map(c=>({...c,score:similarity(queryTerms,c)})).sort((a,b)=>b.score-a.score);
+  const cutoff=Number($('threshold').value),k=Number($('topK').value);
+  retrieved=scored.filter(c=>c.score>=cutoff).slice(0,k);
+  $('statRetrieved').textContent=retrieved.length;
+  const found=new Set();retrieved.forEach(c=>c.terms.forEach(t=>{if(queryTerms.includes(t))found.add(t)}));
+  $('statTerms').textContent=found.size;
+  $('retrievalPill').textContent=retrieved.length?'RETRIEVED':'NO MATCHES';$('retrievalPill').className='pill '+(retrieved.length?'green':'amber');
+  if(!retrieved.length){
+    $('results').innerHTML='<div class="empty">No chunks passed the score cutoff. Try lowering the threshold, changing the question, or checking whether the fact exists in your documents.</div>';
+  }else{
+    $('results').innerHTML=retrieved.map(c=>`<article class="match"><div class="match-top"><span>Chunk ${c.id} · Section ${c.doc}</span><span class="score">${Math.round(c.score*100)}% demo score</span></div><div class="bar"><span style="width:${Math.round(c.score*100)}%"></span></div><p>${esc(c.text)}</p></article>`).join('');
+  }
+  const context=retrieved.map(c=>`[Chunk ${c.id} | Section ${c.doc}]\n${c.text}`).join('\n\n')||'(No chunks passed the retrieval threshold.)';
+  $('promptBox').textContent=`SYSTEM:\nAnswer the user's question using only the context below. If the context does not contain the answer, say that you cannot find enough information. Do not invent details.\n\nRETRIEVED CONTEXT:\n${context}\n\nUSER QUESTION:\n${q}\n\nASSISTANT:`;
+  makeAnswer(q,retrieved);
+  updateSteps(5);
+}
+function makeAnswer(q,items){
+  $('answerPill').textContent=items.length?'CONTEXT ADDED':'NO CONTEXT';$('answerPill').className='pill '+(items.length?'green':'amber');
+  if(!items.length){$('answerBox').innerHTML='<h4>Insufficient evidence</h4><p>I could not find a chunk above the selected threshold. A responsible RAG application should avoid guessing and may ask the user to rephrase or consult another source.</p>';return}
+  // Lightweight extractive response: surface sentence(s) sharing query terms.
+  const qs=new Set(words(q));
+  let candidates=[];
+  items.forEach(c=>c.text.split(/(?<=[.!?])\s+/).forEach(s=>{
+    const st=new Set(words(s));let hit=0;qs.forEach(t=>{if(st.has(t))hit++});
+    if(hit)candidates.push({s,hit,chunk:c});
+  }));
+  candidates.sort((a,b)=>b.hit-a.hit);
+  let chosen=candidates.slice(0,3);
+  if(!chosen.length)chosen=items.slice(0,2).map(c=>({s:c.text,hit:0,chunk:c}));
+  const unique=[...new Map(chosen.map(x=>[x.s,x])).values()].slice(0,3);
+  const text=unique.map(x=>`${esc(x.s)} <span class="citation">Chunk ${x.chunk.id}</span>`).join(' ');
+  $('answerBox').innerHTML=`<h4>Evidence-based answer preview</h4><p>${text}</p><p class="tiny" style="margin-top:10px">This is an extractive, rule-based preview—not an LLM response. Verify the cited chunks before relying on the answer.</p>`;
+}
+$('processBtn').addEventListener('click',process);
+$('sampleBtn').addEventListener('click',()=>{$('docs').value=sampleDocs;process()});
+$('retrieveBtn').addEventListener('click',retrieve);
+$('tryBtn').addEventListener('click',()=>{const qs=['Who do I contact if I cannot sign in?','How long does my manager have to review a trip request?','Are international trips approved automatically?','What is the Wi-Fi password at the London office?'];const current=qs.indexOf($('question').value);$('question').value=qs[(current+1)%qs.length];retrieve()});
+document.querySelectorAll('[data-q]').forEach(b=>b.addEventListener('click',()=>{$('question').value=b.dataset.q;retrieve();$('retrievePanel').scrollIntoView({behavior:'smooth',block:'start'})}));
+['chunkSize','overlap'].forEach(id=>$(id).addEventListener('change',()=>{if($('docs').value.trim())process()}));
+['topK','threshold'].forEach(id=>$(id).addEventListener('change',()=>{if(chunks.length&&$('question').value.trim())retrieve()}));
+$('question').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();retrieve()}});
+process();
+</script>
+</body>
+</html>
